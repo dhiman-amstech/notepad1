@@ -54,7 +54,7 @@
             
             var items = [];
             
-            function refreshPage(items) {
+            function refreshPage() {
             	var str = '<ul data-role="listview">';
             	for(var i = 0;i < items.length; i++ ) {
             		str += '<li><a href="#">'+items[i]+'</a></il>';
@@ -64,44 +64,7 @@
             	$("#home").trigger('create');
             }
             $(document).ready(function() {
-            	var db = window.openDatabase("notepad", "1.0", "Notepad", 200000);
-				db.transaction(function(tx){
-					tx.executeSql('CREATE TABLE IF NOT EXISTS posts (id AUTO_INCREMENT UNIQUE, data)');
-				}, function(err) {
-					    alert("Error processing SQL: "+err.code);
-				}, function(tx){
-					 db.transaction(function(tx){
-					 	tx.executeSql('SELECT * FROM posts', [], querySuccess,  function(err) {
-						    alert("Error processing SQL: "+err.code);
-						});
-
-					 },  function(err) {
-					    alert("Error processing SQL: "+err.code);
-					});
-
-				});
-            	
-            	var it = [];
-            	
-            	
-            	function querySuccess(tx, results) {
-			        var len = results.rows.length;
-			        for (var i=0; i<len; i++){
-			            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).data);
-			            var obj = {
-			            	id : results.rows.item(i).id,
-			            	data : results.rows.item(i).data
-			            	
-			            };
-			            it.push(obj);
-			        }
-			        
-			        refreshPage(it);
-			    }
-
-
-            	
-            	
+            	refreshPage();
             	
             	$("#addBtn").on("click", function(){
             		var txt = $.trim($("#newMsg").val());
@@ -113,14 +76,6 @@
 	            	refreshPage();
 	            	$("#newMsg").val('');
 	            	$( "#add" ).panel( "close" );
-	            	
-	            	
-					db.transaction(function(tx) {
-					     tx.executeSql('INSERT INTO DEMO (data) VALUES ("'+txt+'")');
-					}, function(err) {
-					    alert("Error processing SQL: "+err.code);
-					});
-	            	
 	            		            	
 	            });
             });
