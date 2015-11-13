@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+        
+        <title></title>
+    </head>
+    <body>
+        <div data-role="page" id="home">
+			<div data-role="header" data-position="fixed">
+				<div data-role="navbar">
+				    <ul>
+				      <li><a href="#home" data-icon="home"></a></li>
+				      <li><a href="#add" data-icon="edit"></a></li>
+				    </ul>
+				</div>
+			</div>
+			
+			<div id="content" data-role="main" class="ui-content">
+				
+			</div>
+			
+			<div data-role="footer" data-position="fixed">
+				<div data-role="navbar">
+				    <ul>
+				      <li><a href="#" data-icon="ui-btn ui-icon-audio"></a></li>
+				      <li><a href="#" data-icon="ui-btn ui-icon-camera"></a></li>
+				      <li><a href="#" data-icon="ui-btn ui-icon-info"></a></li>
+				    </ul>
+				</div>
+			</div>
+			<div data-role="panel" id="add" data-position="right">
+			  <h4>Add New</h4>
+			  <form>
+			  	<textarea id="newMsg"></textarea>
+			  	<input id="addBtn" type="button" value="Add" />
+			  	<div data-role="popup" id="errorPopup" class="ui-content">
+					<a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+					<p>Please enter some text.</p>
+				</div>
+			  </form>
+			</div>
+        </div>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+            
+            var items = [];
+            
+            function refreshPage(items) {
+            	var str = '<ul data-role="listview">';
+            	for(var i = 0;i < items.length; i++ ) {
+            		str += '<li><a href="#">'+items[i]+'</a></il>';
+            	}
+            	str += '</ul>';
+            	$("#content").html(str);
+            	$("#home").trigger('create');
+            }
+            $(document).ready(function() {
+            	var db = window.openDatabase("notepad", "1.0", "Notepad", 200000);
+				db.transaction(function(tx){
+					tx.executeSql('CREATE TABLE IF NOT EXISTS posts (id AUTO_INCREMENT UNIQUE, data)');
+				}, function(err) {
+					    alert("Error processing SQL: "+err.code);
+				}, function(tx){
+					 db.transaction(function(tx){
+					 	tx.executeSql('SELECT * FROM posts', [], querySuccess,  function(err) {
+						    alert("Error processing SQL: "+err.code);
+						});
+
+					 },  function(err) {
+					    alert("Error processing SQL: "+err.code);
+					});
+
+				});
+            	
+            	var it = [];
+            	
+            	
+            	function querySuccess(tx, results) {
+			        var len = results.rows.length;
+			        for (var i=0; i<len; i++){
+			            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).data);
+			            var obj = {
+			            	id : results.rows.item(i).id,
+			            	data : results.rows.item(i).data
+			            	
+			            };
+			            it.push(obj);
+			        }
+			        
+			        refreshPage(it);
+			    }
+
+
+            	
+            	
+            	
+            	$("#addBtn").on("click", function(){
+            		var txt = $.trim($("#newMsg").val());
+            		if(txt.length == 0) {
+            			$("#errorPopup").popup("open");
+            			return;
+            		}
+	            	items.push($("#newMsg").val());
+	            	refreshPage();
+	            	$("#newMsg").val('');
+	            	$( "#add" ).panel( "close" );
+	            	
+	            	
+					db.transaction(function(tx) {
+					     tx.executeSql('INSERT INTO DEMO (data) VALUES ("'+txt+'")');
+					}, function(err) {
+					    alert("Error processing SQL: "+err.code);
+					});
+	            	
+	            		            	
+	            });
+            });
+        </script>
+    </body>
+</html>
